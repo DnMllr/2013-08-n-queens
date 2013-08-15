@@ -3,28 +3,89 @@
 // (There are also optimizations that will allow you to skip a lot of the dead search space)
 
 window.findNRooksSolution = function(n){
-  var solution = undefined;
-  console.log('Single solution for ' + n + ' rooks:', solution);
-  return solution;
+  var solutionSet = [];
+  var solutionFinder = function(input, n, position) {
+    if (position < n) {
+      for (var i = 0 ; i < n ; i++) {
+        input[position] = i;
+        solutionFinder(input, n, position+1);
+      }
+    } else {
+      var hello = input.slice(0);
+      solutionSet.push(hello);
+    }
+  };
+  solutionFinder([], n, 0);
+  solutionSet = _.map(solutionSet, function(item){return _.uniq(item);});
+  solutionSet = _.filter(solutionSet, function(item){
+    return item.length === n;
+  });
+  console.log('Single solution for ' + n + ' rooks:', solutionSet[0]);
+  return solutionSet;
 };
 
 window.countNRooksSolutions = function(n){
-  var solutionCount = undefined; //fixme
+  var solutionSet = [];
+  var solutionFinder = function(input, n, position) {
+    if (position < n) {
+      for (var i = 0 ; i < n ; i++) {
+        input[position] = i;
+        solutionFinder(input, n, position+1);
+      }
+    } else {
+      var hello = input.slice(0);
+      solutionSet.push(hello);
+    }
+  };
+  solutionFinder([], n, 0);
+  solutionSet = _.map(solutionSet, function(item){return _.uniq(item);});
+  solutionSet = _.filter(solutionSet, function(item){
+    return item.length === n;
+  });
+  console.log('Number of solutions for ' + n + ' rooks:', solutionSet.length);
+  return solutionSet.length;
+};
 
-  console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
-  return solutionCount;
+window.countNRooksSolutionsBW = function(n){
+  var counter = 0;
+  var nOnes = (1<<n)-1;
+  var recurseSearch = function(column) {
+    var possibilities = ~column & nOnes;
+    while (possibilities > 0) {
+      var rookPlacement = -possibilities & possibilities;
+      possibilities = possibilities^rookPlacement;
+      recurseSearch(column|rookPlacement);
+    }
+    if (column === nOnes) {
+      counter++;
+    }
+  };
+  recurseSearch(0);
+  return counter;
 };
 
 window.findNQueensSolution = function(n){
   var solution = undefined; //fixme
-
   console.log('Single solution for ' + n + ' queens:', solution);
   return solution;
 };
 
 window.countNQueensSolutions = function(n){
-  var solutionCount = undefined; //fixme
-
+  var counter = 0;
+  var nOnes = (1<<n)-1;
+  var recurseSearch = function(leftDiagonal, column, rightDiagonal) {
+    var possibilities = ~(leftDiagonal | column | rightDiagonal) & nOnes;
+    while (possibilities > 0) {
+      var queenPlacement = -possibilities & possibilities;
+      possibilities = possibilities^queenPlacement;
+      recurseSearch((leftDiagonal|queenPlacement)<<1, column|queenPlacement, (rightDiagonal|queenPlacement)>>1);
+    }
+    if (column === nOnes) {
+      counter++;
+    }
+  };
+  recurseSearch(0, 0, 0);
+  var solutionCount = counter;
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
 };
@@ -38,75 +99,4 @@ window.displayBoard = function(matrix){
       model: new Board(matrix)
     }).render()
   );
-};
-
-
-var nQueens = {};
-nQueens.findNQueens = function(n) {
-  var initialPossPlaces = [];
-  for(var i=0; i<n; i++) {
-    initialPossPlaces.push(0);
-  }
-
-  var row = initialPossPlaces.slice(0),
-  minor = initialPossPlaces.slice(0),
-  major = initialPossPlaces.slice(0),
-  column = initialPossPlaces.slice(0),
-  countOfQueens = 0,
-  results = [];
-
-  initialPossPlaces = nQueens.collisions(n, minor, major, column);
-  results.push(this.queenPlacer(n, minor, major, column, initialPossPlaces, countOfQueens));
-  return results.length;
-};
-
-nQueens.collisions = function(n, minor, major, column) {
-  var notPossiblePlaces = [];
-
-  var possibleIndexes = [];
-  minor.pop();
-  minor.unshift(0);
-
-  major.shift();
-  major.push(0);
-
-  for(var i=0; i<n; i++) {
-    notPossiblePlaces[i] = column[i] || minor[i] || major[i];
-  }
-  _.each(notPossiblePlaces, function(notPossiblePlace, index) {
-    !(notPossiblePlace) && possibleIndexes.push(index);
-  });
-  return possibleIndexes;
-};
-
-nQueens.queenPlacer = function(n, minor, major, column, possibleIndexes, countOfQueens) {
-  for(var i=0 ; i < possibleIndexes.length ; i++) {
-    var endOfBoard = _.reduce(column, function(sum, num) {
-      return sum + num;
-    }, 0);
-    if(endOfBoard === n) {
-      countOfQueens++;
-      return countOfQueens;
-    } else if (possibleIndexes.length > 0) {
-      var queenPlace = possibleIndexes[i];
-      column[queenPlace] = 1;
-      minor[queenPlace] = 1;
-      major[queenPlace] = 1;
-
-      var possibleIndex = this.collisions(n, minor, major, column);
-
-      return nQueens.queenPlacer(n, minor, major, column, possibleIndex, countOfQueens);
-    } else {
-      return false;
-    }
-  }
-
-
-  // placeQueen at index;
-  // column at index = 1;
-  // minor at index + 1 = 1;
-  // major at index - 1 = 1;
-
-  //terminating condition: are we at the last row? return true
-  //terminating condition: are there any places we can't place? return false
 };
