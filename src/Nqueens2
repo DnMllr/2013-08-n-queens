@@ -58,7 +58,7 @@ nQueens.possibleIndexes = function(notPossiblePlaces) {
   _.each(notPossiblePlaces, function(notPossiblePlace, index) {
     if (!(notPossiblePlace)) {
       possibleIndexes.push(index);
-    };
+    }
   });
 
 
@@ -68,7 +68,7 @@ nQueens.possibleIndexes = function(notPossiblePlaces) {
 
 nQueens.queenPlacer = function(n, possibleIndexes, blacklister) {
   // ** if column.sum = n
-  if (_.reduce(blacklister.column, function(a, b) {return a + b}, 0) === n) {
+  if (_.reduce(blacklister.column, function(a, b) {return a + b;}, 0) === n) {
     // incriment the queen counter
     // console.log(blacklister, " completed");
     nQueens.counter = nQueens.counter + 1;
@@ -90,8 +90,8 @@ nQueens.queenPlacer = function(n, possibleIndexes, blacklister) {
       blacklister2.minor[possibleIndexes[i]] = 1;
       blacklister2.major[possibleIndexes[i]] = 1;
       blacklister2 = nQueens.shifter(blacklister2);
-      // console.log(blacklister2, item, collection);
       var possibleIndexes2 = nQueens.possibleIndexes(nQueens.notPossible(blacklister2));
+      console.log(possibleIndexes2);
       nQueens.queenPlacer(n, possibleIndexes2, blacklister2);
       blacklister2.column[possibleIndexes[i]] = 0;
       blacklister2.minor[possibleIndexes[i]] = 0;

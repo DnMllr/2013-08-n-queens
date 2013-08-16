@@ -65,9 +65,30 @@ window.countNRooksSolutionsBW = function(n){
 };
 
 window.findNQueensSolution = function(n){
-  var solution = undefined; //fixme
-  console.log('Single solution for ' + n + ' queens:', solution);
-  return solution;
+  // debugger;
+  var solutionSet = [];
+  var counter = 0;
+  var nOnes = (1<<n)-1;
+  var recurseSearch = function(leftDiagonal, column, rightDiagonal, queenHistory) {
+    queenHistory = queenHistory || [];
+    var possibilities = ~(leftDiagonal | column | rightDiagonal) & nOnes;
+    while (possibilities > 0) {
+      var queenPlacement = -possibilities & possibilities;
+      possibilities = possibilities^queenPlacement;
+      queenHistory.push(queenPlacement);
+      recurseSearch((leftDiagonal|queenPlacement)<<1, column|queenPlacement, (rightDiagonal|queenPlacement)>>1, queenHistory);
+    }
+    if (column === nOnes) {
+      counter++;
+      queenHistory = _.map(queenHistory, function(item){
+        return Math.log(item)/Math.log(2);
+      });
+      solutionSet.push(queenHistory);
+    }
+  };
+  recurseSearch(0, 0, 0);
+  console.log('Single solution for ' + n + ' queens:', solutionSet);
+  return solutionSet;
 };
 
 window.countNQueensSolutions = function(n){
